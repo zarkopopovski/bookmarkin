@@ -14,6 +14,10 @@ type Routes []Route
 func RoutesMap(api *ApiConnection) Routes {
 	var routes = Routes{
 		Route{"Index", "GET", "/", api.Index},
+		Route{"CreateBookmarkGroup", "POST", "/create_group", api.bHandlers.CreateBookmarkGroup},
+		Route{"UpdateBookmarkGroup", "POST", "/update_group", api.bHandlers.UpdateBookmarkGroup},
+		Route{"DeleteBookmarkGroup", "POST", "/delete_group", api.bHandlers.DeleteBookmarkGroup},
+		Route{"ListBookmarkGroups", "POST", "/list_groups", api.bHandlers.ListBookmarkGroups},
 		Route{"ReadPageTitle", "POST", "/read_page_title", api.bHandlers.ReadPageTitle},
 		Route{"SaveBookmark", "POST", "/save_bookmark", api.bHandlers.SaveBookmark},
 		Route{"CreateBookmark", "POST", "/create_bookmark", api.bHandlers.CreateBookmark},
