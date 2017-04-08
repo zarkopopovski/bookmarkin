@@ -1,2 +1,2 @@
-# selfmark
+# SelfMark
 SelfMark - personal bookmark api
