@@ -11,8 +11,28 @@ type BookmarkHandlers struct {
 }
 
 func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+	groupName := r.FormValue("group_name")
+	
+	if groupName != "" {
 
+		bookmark := &Bookmark{}
 
+		result := bookmark.CreateNewGroup(bHandlers.dbConnection, groupName)
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
 
 func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +46,25 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 }
 
 func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *http.Request) {
+	bookmark := &Bookmark{}
 
+	result := bookmark.ListAllGroups(bHandlers.dbConnection)
+
+	if result != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 
 }
 
@@ -119,19 +157,6 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkGroup := r.FormValue("bookmark_group")
 	result := false
-	
-	resp, err := http.Get(bookmarkURL)
-	
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	if title, ok := GetHtmlTitle(resp.Body); ok {
-		bookmarkTitle = title
-	} else {
-		println("Fail to get HTML title")
-	}
 
 	if bookmarkTitle != "" {
 		fmt.Println(bookmarkTitle)
