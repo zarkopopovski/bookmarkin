@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"fmt"
+	"strconv"
 )
 
 type BookmarkHandlers struct {
@@ -41,8 +42,85 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r 
 }
 
 func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+	groupID := r.FormValue("group_id")
+	forceDelete := r.FormValue("force")
 
+	bForceDelete, err := strconv.ParseBool(forceDelete)
+	if err != nil {
+		bForceDelete = false
+	}
+	
+	if groupID != "" {
 
+		bookmark := &Bookmark{}
+
+		result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID)
+
+		if result != nil && len(result) > 0 {
+			if bForceDelete == true {
+				result := bookmark.DeleteBookmarksInGroup(bHandlers.dbConnection, groupID)
+
+				if result {
+					
+					result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID)
+
+					if result {
+						w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+						w.WriteHeader(http.StatusOK)
+
+						if err := json.NewEncoder(w).Encode(result); err != nil {
+							panic(err)
+						}
+						return
+					} else {
+						w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+						w.WriteHeader(http.StatusNotFound)
+						if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Error deleting group."}); err != nil {
+							panic(err)
+						}
+					}
+				} else {
+					w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+					w.WriteHeader(http.StatusNotFound)
+					if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Error deleting bookmarks from group."}); err != nil {
+						panic(err)
+					}
+				}
+			} else {
+				w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				w.WriteHeader(http.StatusNotFound)
+				if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Bookmarks exists in the group."}); err != nil {
+					panic(err)
+				}
+			}
+		} else {
+			result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID)
+
+			if result {
+				w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				w.WriteHeader(http.StatusOK)
+
+				if err := json.NewEncoder(w).Encode(result); err != nil {
+					panic(err)
+				}
+				return
+			} else {
+				w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				w.WriteHeader(http.StatusNotFound)
+				if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Error deleting group."}); err != nil {
+					panic(err)
+				}
+			}
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
 
 func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *http.Request) {
@@ -214,5 +292,29 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *htt
 }
 
 func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
+	bookmarkID := r.FormValue("bookmark_id")
+	result := false
+	
+	if bookmarkID != "" {
+		bookmark := &Bookmark{}
 
+		result = bookmark.DeleteBookmarkByID(bHandlers.dbConnection, bookmarkID)
+
+		if result {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(result); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }

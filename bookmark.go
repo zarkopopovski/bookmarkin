@@ -38,6 +38,18 @@ func (bookmark *Bookmark) CreateNewGroup(dbConnection *DBConnection, groupName s
 	return true
 }
 
+func (bookmark *Bookmark) DeleteBookmarkGroupByID(dbConnection *DBConnection, groupID string) bool {
+	query := "DELETE FROM groups WHERE id='" + groupID + "'"
+	
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
 func (bookmark *Bookmark) ListAllGroups(dbConnection *DBConnection) []*Group {
 
 	query := "SELECT id, group_name FROM groups"
@@ -92,9 +104,80 @@ func (bookmark *Bookmark) CreateNewBookmark(dbConnection *DBConnection) bool {
 	return true
 }
 
+func (bookmark *Bookmark) DeleteBookmarkByID(dbConnection *DBConnection, bookmarkID string) bool {
+	query := "DELETE FROM bookmarks WHERE id='" + bookmarkID + "'"
+	
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
+func (bookmark *Bookmark) DeleteBookmarksInGroup(dbConnection *DBConnection, groupID string) bool {
+	query := "DELETE FROM bookmarks WHERE bookmark_group='" + groupID + "'"
+	
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
+func (bookmark *Bookmark) DeleteBookmarksAll(dbConnection *DBConnection) bool {
+	query := "DELETE FROM bookmarks"
+	
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
 func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection) []*Bookmark {
 
 	query := "SELECT id, bookmark_url, bookmark_title, bookmark_group FROM bookmarks"
+	
+	rows, err := dbConnection.db.Query(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	bookmarks := make([]*Bookmark, 0)
+
+	for rows.Next() {
+
+		newBookmark := new(Bookmark)
+
+		err := rows.Scan(
+			&newBookmark.Id, 
+			&newBookmark.BookmarkUrl, 
+			&newBookmark.BookmarkTitle, 
+			&newBookmark.BookmarkGroup)
+
+		if err != nil {
+			log.Fatal(err)
+			return nil
+		}
+
+		bookmarks = append(bookmarks, newBookmark)
+
+	}
+
+	return bookmarks
+}
+
+func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, groupID string) []*Bookmark {
+
+	query := "SELECT id, bookmark_url, bookmark_title, bookmark_group FROM bookmarks WHERE bookmark_group='" + groupID + "'"
 	
 	rows, err := dbConnection.db.Query(query)
 
