@@ -162,7 +162,7 @@ func (bookmark *Bookmark) DeleteBookmarksAll(dbConnection *DBConnection) bool {
 }
 
 func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection) []*Bookmark {
-	query := "SELECT id, bookmark_url, bookmark_title, bookmark_group FROM bookmarks"
+	query := "SELECT b.id, b.bookmark_url, b.bookmark_title, b.bookmark_group, g.group_name FROM bookmarks b INNER JOIN groups g ON b.bookmark_group=g.id"
 	
 	rows, err := dbConnection.db.Query(query)
 

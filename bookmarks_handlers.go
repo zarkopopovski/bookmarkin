@@ -308,6 +308,30 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 	}
 }
 
+func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {
+	groupID := r.FormValue("group_id")
+
+	bookmark := &Bookmark{}
+
+	result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID)
+
+		if result != nil {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(result); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
 func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *http.Request) {
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkID := r.FormValue("bookmark_id")
