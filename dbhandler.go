@@ -18,7 +18,7 @@ func OpenConnectionSession() (dbConnection *DBConnection) {
 }
 
 func (dbConnection *DBConnection) createNewDBConnection() (err error) {
-	db, err := sql.Open("sqlite3", "./selfmark.db")
+	db, err := sql.Open("sqlite3", "./bookmarkin.db")
 	if err != nil {
 		panic(err)
 	}

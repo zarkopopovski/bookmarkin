@@ -37,8 +37,29 @@ func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r 
 }
 
 func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+	groupName := r.FormValue("group_name")
+	groupID := r.FormValue("group_id")
+	
+	if groupName != "" {
 
+		bookmark := &Bookmark{}
 
+		result := bookmark.UpdateExistingGroup(bHandlers.dbConnection, groupID, groupName)
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
 
 func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r *http.Request) {
@@ -288,7 +309,35 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 }
 
 func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *http.Request) {
+	bookmarkTitle := r.FormValue("bookmark_title")
+	bookmarkID := r.FormValue("bookmark_id")
 
+	result := false
+
+	if bookmarkTitle != "" {
+		fmt.Println(bookmarkTitle)
+
+		bookmark := &Bookmark{}
+
+		result = bookmark.UpdateExistingBookmark(bHandlers.dbConnection, bookmarkID, bookmarkTitle)
+
+		if result {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(result); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
 }
 
 func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
