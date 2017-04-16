@@ -19,14 +19,14 @@ type Group struct {
 	GroupName           string   `json:"group_name"`
 }
 
-func (bookmark *Bookmark) CreateNewGroup(dbConnection *DBConnection, groupName string) bool {
+func (bookmark *Bookmark) CreateNewGroup(dbConnection *DBConnection, groupName string, userID string) bool {
 	sha1Hash := sha1.New()
 	sha1Hash.Write([]byte(time.Now().String() + groupName))
 	sha1HashString := sha1Hash.Sum(nil)
 
 	groupID := fmt.Sprintf("%x", sha1HashString)
 
-	query := "INSERT INTO groups(id, group_name) VALUES('"+groupID+"','"+groupName+"')"
+	query := "INSERT INTO groups(id, user_id, group_name) VALUES('"+groupID+"','"+userID+"','"+groupName+"')"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -37,8 +37,8 @@ func (bookmark *Bookmark) CreateNewGroup(dbConnection *DBConnection, groupName s
 	return true
 }
 
-func (bookmark *Bookmark) UpdateExistingGroup(dbConnection *DBConnection, groupID string, groupName string) bool {
-	query := "UPDATE groups SET group_name='"+groupName+"' WHERE id='"+groupID+"'"
+func (bookmark *Bookmark) UpdateExistingGroup(dbConnection *DBConnection, groupID string, groupName string, userID string) bool {
+	query := "UPDATE groups SET group_name='"+groupName+"' WHERE id='"+groupID+"' AND user_id='"+userID+"'"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -49,8 +49,8 @@ func (bookmark *Bookmark) UpdateExistingGroup(dbConnection *DBConnection, groupI
 	return true
 }
 
-func (bookmark *Bookmark) DeleteBookmarkGroupByID(dbConnection *DBConnection, groupID string) bool {
-	query := "DELETE FROM groups WHERE id='" + groupID + "'"
+func (bookmark *Bookmark) DeleteBookmarkGroupByID(dbConnection *DBConnection, groupID string, userID string) bool {
+	query := "DELETE FROM groups WHERE id='" + groupID + "' AND user_id='"+userID+"'"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -61,8 +61,8 @@ func (bookmark *Bookmark) DeleteBookmarkGroupByID(dbConnection *DBConnection, gr
 	return true
 }
 
-func (bookmark *Bookmark) ListAllGroups(dbConnection *DBConnection) []*Group {
-	query := "SELECT id, group_name FROM groups"
+func (bookmark *Bookmark) ListAllGroups(dbConnection *DBConnection, userID string) []*Group {
+	query := "SELECT id, group_name FROM groups WHERE user_id='"+userID+"' AND user_id='"+userID+"'"
 	
 	rows, err := dbConnection.db.Query(query)
 
@@ -94,15 +94,15 @@ func (bookmark *Bookmark) ListAllGroups(dbConnection *DBConnection) []*Group {
 }
 
 
-func (bookmark *Bookmark) CreateNewBookmark(dbConnection *DBConnection) bool {
+func (bookmark *Bookmark) CreateNewBookmark(dbConnection *DBConnection, userID string) bool {
 	sha1Hash := sha1.New()
 	sha1Hash.Write([]byte(time.Now().String() + bookmark.BookmarkTitle + " " + bookmark.BookmarkUrl + " " + bookmark.BookmarkGroup))
 	sha1HashString := sha1Hash.Sum(nil)
 
 	bookmarkID := fmt.Sprintf("%x", sha1HashString)
 
-	query := "INSERT INTO bookmarks(id, bookmark_url, bookmark_title, bookmark_group) VALUES('"+
-	bookmarkID+"','"+bookmark.BookmarkUrl+"','"+bookmark.BookmarkTitle+"','"+bookmark.BookmarkGroup+"')"
+	query := "INSERT INTO bookmarks(id, user_id, bookmark_url, bookmark_title, bookmark_group) VALUES('"+
+	bookmarkID+"','"+userID+"','"+bookmark.BookmarkUrl+"','"+bookmark.BookmarkTitle+"','"+bookmark.BookmarkGroup+"')"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -113,8 +113,20 @@ func (bookmark *Bookmark) CreateNewBookmark(dbConnection *DBConnection) bool {
 	return true
 }
 
-func (bookmark *Bookmark) UpdateExistingBookmark(dbConnection *DBConnection, bookmarkID string, bookmarkName string) bool {
-	query := "UPDATE bookmarks SET bookmark_title='"+bookmarkName+"' WHERE id='"+bookmarkID+"'"
+func (bookmark *Bookmark) UpdateExistingBookmark(dbConnection *DBConnection, bookmarkID string, bookmarkName string, userID string) bool {
+	query := "UPDATE bookmarks SET bookmark_title='"+bookmarkName+"' WHERE id='"+bookmarkID+"' AND user_id='"+userID+"'"
+	fmt.Println(query)
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
+func (bookmark *Bookmark) DeleteBookmarkByID(dbConnection *DBConnection, bookmarkID string, userID string) bool {
+	query := "DELETE FROM bookmarks WHERE id='" + bookmarkID + "' AND user_id='"+userID+"'"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -125,20 +137,8 @@ func (bookmark *Bookmark) UpdateExistingBookmark(dbConnection *DBConnection, boo
 	return true
 }
 
-func (bookmark *Bookmark) DeleteBookmarkByID(dbConnection *DBConnection, bookmarkID string) bool {
-	query := "DELETE FROM bookmarks WHERE id='" + bookmarkID + "'"
-	
-	_, err := dbConnection.db.Exec(query)
-
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-	return true
-}
-
-func (bookmark *Bookmark) DeleteBookmarksInGroup(dbConnection *DBConnection, groupID string) bool {
-	query := "DELETE FROM bookmarks WHERE bookmark_group='" + groupID + "'"
+func (bookmark *Bookmark) DeleteBookmarksInGroup(dbConnection *DBConnection, groupID string, userID string) bool {
+	query := "DELETE FROM bookmarks WHERE bookmark_group='" + groupID + "' AND user_id='"+userID+"'"
 	
 	_, err := dbConnection.db.Exec(query)
 
@@ -161,8 +161,8 @@ func (bookmark *Bookmark) DeleteBookmarksAll(dbConnection *DBConnection) bool {
 	return true
 }
 
-func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection) []*Bookmark {
-	query := "SELECT b.id, b.bookmark_url, b.bookmark_title, b.bookmark_group, g.group_name FROM bookmarks b INNER JOIN groups g ON b.bookmark_group=g.id"
+func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection, userID string) []*Bookmark {
+	query := "SELECT b.id, b.bookmark_url, b.bookmark_title, g.group_name FROM bookmarks b INNER JOIN groups g ON b.bookmark_group=g.id AND b.user_id='"+userID+"'"
 	
 	rows, err := dbConnection.db.Query(query)
 
@@ -195,8 +195,8 @@ func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection) []*Bookma
 	return bookmarks
 }
 
-func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, groupID string) []*Bookmark {
-	query := "SELECT id, bookmark_url, bookmark_title, bookmark_group FROM bookmarks WHERE bookmark_group='" + groupID + "'"
+func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, groupID string, userID string) []*Bookmark {
+	query := "SELECT id, bookmark_url, bookmark_title FROM bookmarks WHERE bookmark_group='" + groupID + "' AND user_id='"+userID+"'"
 	
 	rows, err := dbConnection.db.Query(query)
 
@@ -214,8 +214,7 @@ func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, gr
 		err := rows.Scan(
 			&newBookmark.Id, 
 			&newBookmark.BookmarkUrl, 
-			&newBookmark.BookmarkTitle, 
-			&newBookmark.BookmarkGroup)
+			&newBookmark.BookmarkTitle)
 
 		if err != nil {
 			log.Fatal(err)

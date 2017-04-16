@@ -13,12 +13,13 @@ type BookmarkHandlers struct {
 
 func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := r.FormValue("group_name")
-	
+	userID := r.FormValue("user_id")
+
 	if groupName != "" {
 
 		bookmark := &Bookmark{}
 
-		result := bookmark.CreateNewGroup(bHandlers.dbConnection, groupName)
+		result := bookmark.CreateNewGroup(bHandlers.dbConnection, groupName, userID)
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -39,12 +40,13 @@ func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r 
 func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := r.FormValue("group_name")
 	groupID := r.FormValue("group_id")
+	userID := r.FormValue("user_id")
 	
 	if groupName != "" {
 
 		bookmark := &Bookmark{}
 
-		result := bookmark.UpdateExistingGroup(bHandlers.dbConnection, groupID, groupName)
+		result := bookmark.UpdateExistingGroup(bHandlers.dbConnection, groupID, groupName, userID)
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -65,6 +67,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r 
 func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r *http.Request) {
 	groupID := r.FormValue("group_id")
 	forceDelete := r.FormValue("force")
+	userID := r.FormValue("user_id")
 
 	bForceDelete, err := strconv.ParseBool(forceDelete)
 	if err != nil {
@@ -75,15 +78,15 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 
 		bookmark := &Bookmark{}
 
-		result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID)
+		result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID, userID)
 
 		if result != nil && len(result) > 0 {
 			if bForceDelete == true {
-				result := bookmark.DeleteBookmarksInGroup(bHandlers.dbConnection, groupID)
+				result := bookmark.DeleteBookmarksInGroup(bHandlers.dbConnection, groupID, userID)
 
 				if result {
 					
-					result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID)
+					result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID, userID)
 
 					if result {
 						w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -115,7 +118,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 				}
 			}
 		} else {
-			result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID)
+			result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID, userID)
 
 			if result {
 				w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -145,9 +148,11 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 }
 
 func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *http.Request) {
+	userID := r.FormValue("user_id")
+
 	bookmark := &Bookmark{}
 
-	result := bookmark.ListAllGroups(bHandlers.dbConnection)
+	result := bookmark.ListAllGroups(bHandlers.dbConnection, userID)
 
 	if result != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -206,6 +211,7 @@ func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.
 func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkGroup := r.FormValue("bookmark_group")
+	userID := r.FormValue("user_id")
 	bookmarkTitle := ""
 	result := false
 	
@@ -230,7 +236,7 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 			BookmarkTitle:bookmarkTitle, 
 			BookmarkGroup:bookmarkGroup}
 
-		result = bookmark.CreateNewBookmark(bHandlers.dbConnection)
+		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 
 		if result {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -255,6 +261,7 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkGroup := r.FormValue("bookmark_group")
+	userID := r.FormValue("user_id")
 	result := false
 
 	if bookmarkTitle != "" {
@@ -265,7 +272,7 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 			BookmarkTitle:bookmarkTitle, 
 			BookmarkGroup:bookmarkGroup}
 
-		result = bookmark.CreateNewBookmark(bHandlers.dbConnection)
+		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 
 		if result {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -287,9 +294,11 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 }
 
 func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.Request) {
+	userID := r.FormValue("user_id")
+	
 	bookmark := &Bookmark{}
 
-	result := bookmark.ListAllBookmarks(bHandlers.dbConnection)
+	result := bookmark.ListAllBookmarks(bHandlers.dbConnection, userID)
 
 		if result != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -310,10 +319,11 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 
 func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {
 	groupID := r.FormValue("group_id")
+	userID := r.FormValue("user_id")
 
 	bookmark := &Bookmark{}
 
-	result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID)
+	result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID, userID)
 
 		if result != nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -335,6 +345,7 @@ func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r
 func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *http.Request) {
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkID := r.FormValue("bookmark_id")
+	userID := r.FormValue("user_id")
 
 	result := false
 
@@ -343,7 +354,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *htt
 
 		bookmark := &Bookmark{}
 
-		result = bookmark.UpdateExistingBookmark(bHandlers.dbConnection, bookmarkID, bookmarkTitle)
+		result = bookmark.UpdateExistingBookmark(bHandlers.dbConnection, bookmarkID, bookmarkTitle, userID)
 
 		if result {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -366,12 +377,13 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *htt
 
 func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkID := r.FormValue("bookmark_id")
+	userID := r.FormValue("user_id")
 	result := false
 	
 	if bookmarkID != "" {
 		bookmark := &Bookmark{}
 
-		result = bookmark.DeleteBookmarkByID(bHandlers.dbConnection, bookmarkID)
+		result = bookmark.DeleteBookmarkByID(bHandlers.dbConnection, bookmarkID, userID)
 
 		if result {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
