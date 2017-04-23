@@ -31,3 +31,22 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 	}
 	return true
 }
+
+func (user *User) CheckUserCredentials(dbConnection *DBConnection) *User {
+	query := "SELECT id, username, password, email FROM users WHERE username='"+user.Username+"' AND password='"+user.Password+"'"
+	
+	newUser := new(User)
+
+	err := dbConnection.db.QueryRow(query).Scan(
+		&newUser.Id,
+		&newUser.Username,
+		&newUser.Password,
+		&newUser.Email)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	return newUser
+}

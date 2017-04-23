@@ -26,6 +26,8 @@ func RoutesMap(api *ApiConnection) Routes {
 		Route{"UpdateBookmark", "POST", "/update_bookmarks", api.bHandlers.UpdateBookmarks},
 		Route{"DeleteBookmark", "POST", "/delete_bookmarks", api.bHandlers.DeleteBookmark},
 		Route{"CreateNewUser", "POST", "/create_user", api.uHandlers.CreateUserAccount},
+		Route{"LoginUser", "POST", "/login_user", api.uHandlers.LoginWithCredentials},
+
 	}
 
 	return routes
