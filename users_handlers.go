@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	//"fmt"
+	"crypto/sha1"
+	"fmt"
 	//"strconv"
 )
 
@@ -16,9 +17,15 @@ func (uHandlers *UsersHandlers) CreateUserAccount(w http.ResponseWriter, r *http
 	password := r.FormValue("password")
 	email := r.FormValue("email")
 
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(password))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	passwordEnc := fmt.Sprintf("%x", sha1HashString)
+
 	user := &User{
 		Username:username,
-		Password:password,
+		Password:passwordEnc,
 		Email:email}
 
 	result := user.CreateNewUser(uHandlers.dbConnection)
@@ -45,9 +52,15 @@ func (uHandlers *UsersHandlers) LoginWithCredentials(w http.ResponseWriter, r *h
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
+	sha1Hash := sha1.New()
+	sha1Hash.Write([]byte(password))
+	sha1HashString := sha1Hash.Sum(nil)
+
+	passwordEnc := fmt.Sprintf("%x", sha1HashString)
+
 	user := &User{
 		Username:username,
-		Password:password}
+		Password:passwordEnc}
 
 	result := user.CheckUserCredentials(uHandlers.dbConnection)
 
