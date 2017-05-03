@@ -27,12 +27,12 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 	fmt.Println("SQLite Connection is Active")
 	dbConnection.db = db
 
-	dbConnection.createDefaultUser()	
+	dbConnection.createDefaultData()	
 
 	return
 }
 
-func (dbConnection *DBConnection) createDefaultUser() bool {
+func (dbConnection *DBConnection) createDefaultData() bool {
 	query := "SELECT id, username, password, email FROM users WHERE username='root' AND password='root'"
 
 	err := dbConnection.db.QueryRow(query)
@@ -44,9 +44,17 @@ func (dbConnection *DBConnection) createDefaultUser() bool {
 
 		passwordEnc := fmt.Sprintf("%x", sha1HashString)
 		
-		query = "INSERT INTO users(id, username, password, email, date_created) VALUES('0','root','"+passwordEnc+"','0', date('now'))"
+		query = "INSERT INTO users(id, username, password, email, date_created) VALUES('11','root','"+passwordEnc+"','0', date('now'))"
 	
 		_, err := dbConnection.db.Exec(query)
+
+		if err != nil {
+			return false
+		}
+
+		query = "INSERT INTO groups(id, user_id, group_name) VALUES('111','11','Default')"
+
+		_, err = dbConnection.db.Exec(query)
 
 		if err != nil {
 			return false
