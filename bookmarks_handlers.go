@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
 	"strconv"
 )
 
@@ -41,7 +41,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r 
 	groupName := r.FormValue("group_name")
 	groupID := r.FormValue("group_id")
 	userID := r.FormValue("user_id")
-	
+
 	if groupName != "" {
 
 		bookmark := &Bookmark{}
@@ -73,7 +73,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 	if err != nil {
 		bForceDelete = false
 	}
-	
+
 	if groupID != "" {
 
 		bookmark := &Bookmark{}
@@ -85,7 +85,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 				result := bookmark.DeleteBookmarksInGroup(bHandlers.dbConnection, groupID, userID)
 
 				if result {
-					
+
 					result := bookmark.DeleteBookmarkGroupByID(bHandlers.dbConnection, groupID, userID)
 
 					if result {
@@ -175,9 +175,9 @@ func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *
 func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.Request) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkTitle := ""
-	
+
 	resp, err := http.Get(bookmarkURL)
-	
+
 	if err != nil {
 		panic(err)
 	}
@@ -191,7 +191,7 @@ func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.
 
 	if bookmarkTitle != "" {
 		fmt.Println(bookmarkTitle)
-		
+
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
@@ -214,9 +214,9 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 	userID := r.FormValue("user_id")
 	bookmarkTitle := ""
 	result := false
-	
+
 	resp, err := http.Get(bookmarkURL)
-	
+
 	if err != nil {
 		panic(err)
 	}
@@ -232,9 +232,9 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 		fmt.Println(bookmarkTitle)
 
 		bookmark := &Bookmark{
-			BookmarkUrl:bookmarkURL, 
-			BookmarkTitle:bookmarkTitle, 
-			BookmarkGroup:bookmarkGroup}
+			BookmarkUrl:   bookmarkURL,
+			BookmarkTitle: bookmarkTitle,
+			BookmarkGroup: bookmarkGroup}
 
 		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 
@@ -268,9 +268,9 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 		fmt.Println(bookmarkTitle)
 
 		bookmark := &Bookmark{
-			BookmarkUrl:bookmarkURL, 
-			BookmarkTitle:bookmarkTitle, 
-			BookmarkGroup:bookmarkGroup}
+			BookmarkUrl:   bookmarkURL,
+			BookmarkTitle: bookmarkTitle,
+			BookmarkGroup: bookmarkGroup}
 
 		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 
@@ -295,20 +295,20 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 
 func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("user_id")
-	
+
 	bookmark := &Bookmark{}
 
 	result := bookmark.ListAllBookmarks(bHandlers.dbConnection, userID)
 
-		if result != nil {
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(http.StatusOK)
+	if result != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
 
-			if err := json.NewEncoder(w).Encode(result); err != nil {
-				panic(err)
-			}
-			return
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
 		}
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusNotFound)
@@ -325,15 +325,15 @@ func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r
 
 	result := bookmark.ListAllBookmarksInGroup(bHandlers.dbConnection, groupID, userID)
 
-		if result != nil {
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(http.StatusOK)
+	if result != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
 
-			if err := json.NewEncoder(w).Encode(result); err != nil {
-				panic(err)
-			}
-			return
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
 		}
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusNotFound)
@@ -379,7 +379,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http
 	bookmarkID := r.FormValue("bookmark_id")
 	userID := r.FormValue("user_id")
 	result := false
-	
+
 	if bookmarkID != "" {
 		bookmark := &Bookmark{}
 

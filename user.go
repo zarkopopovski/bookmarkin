@@ -1,17 +1,17 @@
 package main
 
 import (
-	"log"
 	"crypto/sha1"
-	"time"
 	"fmt"
+	"log"
+	"time"
 )
 
 type User struct {
-	Id			string `json:"id"`
-	Username	string `json:"username"`
-	Password	string `json:"password"`
-	Email		string `json:"email"`
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
@@ -21,8 +21,8 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 
 	userID := fmt.Sprintf("%x", sha1HashString)
 
-	query := "INSERT INTO users(id, username, password, email, date_created) VALUES('"+userID+"','"+user.Username+"','"+user.Password+"','"+user.Email+"', date('now'))"
-	
+	query := "INSERT INTO users(id, username, password, email, date_created) VALUES('" + userID + "','" + user.Username + "','" + user.Password + "','" + user.Email + "', date('now'))"
+
 	_, err := dbConnection.db.Exec(query)
 
 	if err != nil {
@@ -33,8 +33,8 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 }
 
 func (user *User) CheckUserCredentials(dbConnection *DBConnection) *User {
-	query := "SELECT id, username, password, email FROM users WHERE username='"+user.Username+"' AND password='"+user.Password+"'"
-	
+	query := "SELECT id, username, password, email FROM users WHERE username='" + user.Username + "' AND password='" + user.Password + "'"
+
 	newUser := new(User)
 
 	err := dbConnection.db.QueryRow(query).Scan(
@@ -49,4 +49,35 @@ func (user *User) CheckUserCredentials(dbConnection *DBConnection) *User {
 	}
 
 	return newUser
+}
+
+func (user *User) CheckUserByID(dbConnection *DBConnection) *User {
+	query := "SELECT id, username, password, email FROM users WHERE id='" + user.Id + "'"
+
+	newUser := new(User)
+
+	err := dbConnection.db.QueryRow(query).Scan(
+		&newUser.Id,
+		&newUser.Username,
+		&newUser.Password,
+		&newUser.Email)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+
+	return newUser
+}
+
+func (user *User) UpdateUserPassword(dbConnection *DBConnection) bool {
+	query := "UPDATE users SET password='" + user.Password + "' WHERE id='" + user.Id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
 }
