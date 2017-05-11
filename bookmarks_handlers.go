@@ -403,3 +403,33 @@ func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http
 		panic(err)
 	}
 }
+
+func (bHandlers *BookmarkHandlers) ChangeBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+	bookmarkID := r.FormValue("bookmark_id")
+	newGroupID := r.FormValue("group_id")
+	result := false
+
+	if bookmarkID != "" {
+		bookmark := &Bookmark{Id: bookmarkID}
+		group := &Group{Id: newGroupID}
+
+		result = bookmark.ChangeGroup(bHandlers.dbConnection, group)
+
+		if result {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(result); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}

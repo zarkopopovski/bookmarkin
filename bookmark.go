@@ -226,3 +226,15 @@ func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, gr
 
 	return bookmarks
 }
+
+func (bookmark *Bookmark) ChangeGroup(dbConnection *DBConnection, group *Group) bool {
+	query := "UPDATE bookmarks SET bookmark_group='" + group.Id + "' WHERE id='" + bookmark.Id + "'"
+
+	_, err := dbConnection.db.Exec(query)
+
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
