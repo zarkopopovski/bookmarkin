@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<!-- <script src="sha1.js"></script> -->
+
+	<script>
+	$(document).ready(function(){
+		$("p").click(function(){
+			$(this).hide();
+		});
+	});
+	var userID = null;
+	</script>
+	<style>
+	body {
+	  padding-top: 80px;
+	  padding-bottom: 40px;
+	  background-color: #eee;
+	}
+
+	.form-signin {
+	  max-width: 480px;
+	  padding: 15px;
+	  margin: 0 auto;
+	}
+	.form-signin .form-signin-heading,
+	.form-signin .checkbox {
+	  margin-bottom: 10px;
+	}
+	.form-signin .checkbox {
+	  font-weight: normal;
+	}
+	.form-signin .form-control {
+	  position: relative;
+	  height: auto;
+	  -webkit-box-sizing: border-box;
+		 -moz-box-sizing: border-box;
+			  box-sizing: border-box;
+	  padding: 10px;
+	  font-size: 16px;
+	}
+	.form-signin .form-control:focus {
+	  z-index: 2;
+	}
+	.form-signin input[type="email"] {
+	  margin-bottom: -1px;
+	  border-bottom-right-radius: 0;
+	  border-bottom-left-radius: 0;
+	}
+	.form-signin input[type="password"] {
+	  margin-bottom: 10px;
+	  border-top-left-radius: 0;
+	  border-top-right-radius: 0;
+	}
+	</style>
+	<title>Bookmarking</title>
+	</head>
+	<body>
+	
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href="#">BookmarkIN</a>
+			</div>
+			<div id="navbar" class="collapse navbar-collapse">
+			  <ul class="nav navbar-nav">
+				<li class="active"><a href="#">Home</a></li>
+				<li><a href="#about">About</a></li>
+				<li><a href="#contact">Contact</a></li>
+			  </ul>
+			</div><!--/.nav-collapse -->
+		  </div>
+    </nav>
+ 
+	<div class="container">
+		<div id="login_form" class="form-group">
+			<form class="form-signin">
+				<input type="text" name="username" id="username" class="form-control" placeholder="Username"/><br/>
+				<input type="password" name="password" id="password" class="form-control" placeholder="Password"/><br/>
+				<button class="btn btn-lg btn-primary btn-block" id="submit_btn">Register</button>
+				<button class="btn btn-lg btn-primary btn-block" id="sign_btn">Login</button>
+			</form>
+		</div>
+	</div>
+	<div class="container">
+		<div id="entry_form" style="display:none">
+			<form class="form-signin">
+				<input type="text" name="site_url" id="site_url" class="form-control" placeholder="URL"/><br/>
+				<button class="btn btn-lg btn-primary btn-block" id="bookmark_btn">BookmarkIN</button>
+			</form>
+		</div>
+	</div>
+
+	<div id="data_form" style="display:none">
+		<div class="row">
+			<div class="col-sm-4">
+				<ul class="list-group">
+				  <li class="list-group-item">
+					Cras justo odio
+				  </li>
+				  <li class="list-group-item">
+					Cras justo odio 2
+				  </li>
+				</ul>
+			</div>
+			<div class="col-sm-4">
+				<ul class="list-group">
+				  <li class="list-group-item">
+					Cras justo 
+				  </li>
+				  <li class="list-group-item">
+					Cras justo 2
+				  </li>
+				  <li class="list-group-item">
+					Cras justo 3
+				  </li>
+				</ul>
+			</div>
+			<div class="col-sm-4">
+				<ul class="list-group">
+				  <li class="list-group-item">
+					Cras  
+				  </li>
+				  <li class="list-group-item">
+					Cras 2<br/> Cras 2a
+				  </li>
+				  <li class="list-group-item">
+					Cras 3
+				  </li>
+				  <li class="list-group-item">
+					Cras 4
+				  </li>
+				</ul>
+			</div>
+		</div>
+
+
+	</div>
+
+	</body>
+		
+	<script>
+		$("#submit_btn").click(function(event){
+			event.preventDefault();
+			var username = $("#username").val();
+			var password = $("#password").val();
+			$.post("http://localhost:8080/create_user", {username: username, password: password}).done(function( data ) {
+				$("#login_form").hide();
+				$("#entry_form").show();
+			});
+		});
+		
+		$("#sign_btn").click(function(event){
+			event.preventDefault();
+			var username = $("#username").val();
+			var password = $("#password").val();
+			$.post("http://localhost:8080/login_user", {username: username, password: password}).done(function( data ) {
+				$("#login_form").hide();
+				$("#entry_form").show();
+			});
+		});
+		
+		$("#bookmark_btn").click(function(event){
+			event.preventDefault();
+			
+			$("#data_form").show();
+			alert(data);
+			
+		});
+		
+		
+		
+	</script>
+</html>

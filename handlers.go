@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"io/ioutil"
+
+	"git.cerebralab.com/george/logo"
 )
 
 type ApiConnection struct {
@@ -24,5 +28,14 @@ func CreateApiConnection() *ApiConnection {
 }
 
 func (c *ApiConnection) Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome!\n")
+	index, err := ioutil.ReadFile("./web/index.html")
+
+	logo.RuntimeError(err)
+
+	if err != nil {
+		logo.RuntimeError(err)
+		return
+	}
+
+	fmt.Fprintf(w, string(index))
 }
