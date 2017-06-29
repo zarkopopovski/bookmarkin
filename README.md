@@ -12,3 +12,6 @@ The main idea behind this service is to be used on your own cloud as your person
 
 ### WHY API?
 **BookmarkIn** is implemented as Restful API so its up to you what frontend you will use or in which language you will implement :).
+
+### IS THE WEB APP ALSO IMPLEMENTED?
+**BookmarkIn** is extended with simple SPA which is still in progress.

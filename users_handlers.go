@@ -30,7 +30,7 @@ func (uHandlers *UsersHandlers) CreateUserAccount(w http.ResponseWriter, r *http
 
 	result := user.CreateNewUser(uHandlers.dbConnection)
 
-	if result {
+	if result != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 

@@ -29,6 +29,7 @@ func RoutesMap(api *ApiConnection) Routes {
 		Route{"CreateNewUser", "POST", "/create_user", api.uHandlers.CreateUserAccount},
 		Route{"ChangePassword", "POST", "/change_password", api.uHandlers.ChangeUserPassword},
 		Route{"LoginUser", "POST", "/login_user", api.uHandlers.LoginWithCredentials},
+		Route{"FavIcon", "GET", "/favicon.ico", api.bHandlers.ShowFavIcon},
 	}
 
 	return routes

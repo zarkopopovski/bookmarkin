@@ -14,7 +14,7 @@ type User struct {
 	Email    string `json:"email"`
 }
 
-func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
+func (user *User) CreateNewUser(dbConnection *DBConnection) *User {
 	sha1Hash := sha1.New()
 	sha1Hash.Write([]byte(time.Now().String() + user.Username + user.Password + user.Email))
 	sha1HashString := sha1Hash.Sum(nil)
@@ -27,9 +27,16 @@ func (user *User) CreateNewUser(dbConnection *DBConnection) bool {
 
 	if err != nil {
 		log.Fatal(err)
-		return false
+		return nil
 	}
-	return true
+
+	newUser := &User{
+		Id:       userID,
+		Username: user.Username,
+		Password: user.Password,
+		Email:    user.Email}
+
+	return newUser
 }
 
 func (user *User) CheckUserCredentials(dbConnection *DBConnection) *User {

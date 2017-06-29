@@ -112,6 +112,11 @@
 
 	<div id="data_form" style="display:none">
 		<div class="row">
+			<div class="col-sm-12">
+				<ul class="list-group" id="bookmarks_list">
+				</ul>
+			</div>
+		<!--
 			<div class="col-sm-4">
 				<ul class="list-group">
 				  <li class="list-group-item">
@@ -150,7 +155,7 @@
 					Cras 4
 				  </li>
 				</ul>
-			</div>
+			</div> -->
 		</div>
 
 
@@ -164,8 +169,13 @@
 			var username = $("#username").val();
 			var password = $("#password").val();
 			$.post("http://localhost:8080/create_user", {username: username, password: password}).done(function( data ) {
+
+				userID = data.id;
+
 				$("#login_form").hide();
 				$("#entry_form").show();
+
+				listBookmarks();
 			});
 		});
 		
@@ -174,20 +184,42 @@
 			var username = $("#username").val();
 			var password = $("#password").val();
 			$.post("http://localhost:8080/login_user", {username: username, password: password}).done(function( data ) {
+
+				userID = data.id;
+
 				$("#login_form").hide();
 				$("#entry_form").show();
+
+				listBookmarks();
 			});
 		});
 		
 		$("#bookmark_btn").click(function(event){
 			event.preventDefault();
-			
-			$("#data_form").show();
-			alert(data);
-			
+			var bookMarkURL = $("#site_url").val();
+			$.post("http://localhost:8080/create_bookmark", {user_id: userID, bookmark_url: bookMarkURL, bookmark_group: "111"}).done(function( data ) {
+				
+				if (data) {
+					listBookmarks();
+				}
+				
+			});	
 		});
 		
-		
+		function listBookmarks() {
+			$.post("http://localhost:8080/list_bookmarks", {user_id: userID}).done(function( data ) {
+				console.log(data);
+
+				if (data) {
+					$('#bookmarks_list').empty();
+					for (i = 0; i < data.length; i++) {
+						$('#bookmarks_list').append('<li class="list-group-item">'+data[i].title+"<br/>"+data[i].url+'</li>');
+					}
+				}
+
+				$("#data_form").show();
+			});
+		}
 		
 	</script>
 </html>

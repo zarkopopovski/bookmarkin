@@ -11,6 +11,10 @@ type BookmarkHandlers struct {
 	dbConnection *DBConnection
 }
 
+func (bHandlers *BookmarkHandlers) ShowFavIcon(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./web/bookmarkin-flat.png")
+}
+
 func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := r.FormValue("group_name")
 	userID := r.FormValue("user_id")
