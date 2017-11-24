@@ -213,7 +213,7 @@
 				if (data) {
 					$('#bookmarks_list').empty();
 					for (i = 0; i < data.length; i++) {
-						$('#bookmarks_list').append('<li class="list-group-item">'+data[i].title+"<br/>"+data[i].url+'</li>');
+						$('#bookmarks_list').append('<li class="list-group-item"><img src="'+data[i].icon+'" width=24 height=24/>'+data[i].title+"<br/>"+data[i].url+'</li>');
 					}
 				}
 

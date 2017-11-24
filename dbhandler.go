@@ -1,14 +1,15 @@
 package main
 
 import (
+	"crypto/sha1"
 	"database/sql"
 	"fmt"
+
 	_ "github.com/mattn/go-sqlite3"
-	"crypto/sha1"
 )
 
 type DBConnection struct {
-	db    *sql.DB
+	db *sql.DB
 }
 
 func OpenConnectionSession() (dbConnection *DBConnection) {
@@ -27,7 +28,21 @@ func (dbConnection *DBConnection) createNewDBConnection() (err error) {
 	fmt.Println("SQLite Connection is Active")
 	dbConnection.db = db
 
-	dbConnection.createDefaultData()	
+	dbConnection.setupInitialDatabase()
+	dbConnection.createDefaultData()
+
+	return
+}
+
+func (dbConnection *DBConnection) setupInitialDatabase() (err error) {
+	statement, _ := dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS users (id VARCHAR PRIMARY KEY, username VARCHAR, email VARCHAR, password VARCHAR, date_created VARCHAR)")
+	statement.Exec()
+
+	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS groups (id VARCHAR PRIMARY KEY, user_id VARCHAR, group_name VARCHAR)")
+	statement.Exec()
+
+	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS bookmarks (id VARCHAR PRIMARY KEY, user_id VARCHAR, bookmark_url VARCHAR, bookmark_title VARCHAR, bookmark_icon VARCHAR, bookmark_group VARCHAR)")
+	statement.Exec()
 
 	return
 }
@@ -43,9 +58,9 @@ func (dbConnection *DBConnection) createDefaultData() bool {
 		sha1HashString := sha1Hash.Sum(nil)
 
 		passwordEnc := fmt.Sprintf("%x", sha1HashString)
-		
-		query = "INSERT INTO users(id, username, password, email, date_created) VALUES('11','root','"+passwordEnc+"','0', date('now'))"
-	
+
+		query = "INSERT INTO users(id, username, password, email, date_created) VALUES('11','root','" + passwordEnc + "','0', date('now'))"
+
 		_, err := dbConnection.db.Exec(query)
 
 		if err != nil {

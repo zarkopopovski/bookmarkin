@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/mat/besticon/besticon"
 )
 
 type BookmarkHandlers struct {
@@ -219,6 +222,9 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 	bookmarkTitle := ""
 	result := false
 
+	besticon.SetLogOutput(ioutil.Discard)
+	finder := besticon.IconFinder{}
+
 	resp, err := http.Get(bookmarkURL)
 
 	if err != nil {
@@ -232,13 +238,23 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 		println("Fail to get HTML title")
 	}
 
+	icons, errIcon := finder.FetchIcons(bookmarkURL)
+
+	iconURL := ""
+
+	if errIcon == nil && len(icons) > 0 {
+		best := icons[0]
+		iconURL = best.URL
+	}
+
 	if bookmarkTitle != "" {
 		fmt.Println(bookmarkTitle)
 
 		bookmark := &Bookmark{
 			BookmarkUrl:   bookmarkURL,
 			BookmarkTitle: bookmarkTitle,
-			BookmarkGroup: bookmarkGroup}
+			BookmarkGroup: bookmarkGroup,
+			IconURL:       iconURL}
 
 		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 

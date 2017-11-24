@@ -12,6 +12,7 @@ type Bookmark struct {
 	BookmarkUrl   string `json:"url"`
 	BookmarkTitle string `json:"title"`
 	BookmarkGroup string `json:"group"`
+	IconURL       string `json:"icon"`
 }
 
 type Group struct {
@@ -100,8 +101,8 @@ func (bookmark *Bookmark) CreateNewBookmark(dbConnection *DBConnection, userID s
 
 	bookmarkID := fmt.Sprintf("%x", sha1HashString)
 
-	query := "INSERT INTO bookmarks(id, user_id, bookmark_url, bookmark_title, bookmark_group) VALUES('" +
-		bookmarkID + "','" + userID + "','" + bookmark.BookmarkUrl + "','" + bookmark.BookmarkTitle + "','" + bookmark.BookmarkGroup + "')"
+	query := "INSERT INTO bookmarks(id, user_id, bookmark_url, bookmark_title, bookmark_icon, bookmark_group) VALUES('" +
+		bookmarkID + "','" + userID + "','" + bookmark.BookmarkUrl + "','" + bookmark.BookmarkTitle + "','" + bookmark.IconURL + "','" + bookmark.BookmarkGroup + "')"
 
 	_, err := dbConnection.db.Exec(query)
 
@@ -161,7 +162,7 @@ func (bookmark *Bookmark) DeleteBookmarksAll(dbConnection *DBConnection) bool {
 }
 
 func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection, userID string) []*Bookmark {
-	query := "SELECT b.id, b.bookmark_url, b.bookmark_title, g.group_name FROM bookmarks b INNER JOIN groups g ON b.bookmark_group=g.id AND b.user_id='" + userID + "'"
+	query := "SELECT b.id, b.bookmark_url, b.bookmark_title, b.bookmark_icon, g.group_name FROM bookmarks b INNER JOIN groups g ON b.bookmark_group=g.id AND b.user_id='" + userID + "'"
 
 	rows, err := dbConnection.db.Query(query)
 
@@ -180,6 +181,7 @@ func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection, userID st
 			&newBookmark.Id,
 			&newBookmark.BookmarkUrl,
 			&newBookmark.BookmarkTitle,
+			&newBookmark.IconURL,
 			&newBookmark.BookmarkGroup)
 
 		if err != nil {
@@ -195,7 +197,7 @@ func (bookmark *Bookmark) ListAllBookmarks(dbConnection *DBConnection, userID st
 }
 
 func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, groupID string, userID string) []*Bookmark {
-	query := "SELECT id, bookmark_url, bookmark_title FROM bookmarks WHERE bookmark_group='" + groupID + "' AND user_id='" + userID + "'"
+	query := "SELECT id, bookmark_url, bookmark_title, bookmark_icon FROM bookmarks WHERE bookmark_group='" + groupID + "' AND user_id='" + userID + "'"
 
 	rows, err := dbConnection.db.Query(query)
 
@@ -213,7 +215,8 @@ func (bookmark *Bookmark) ListAllBookmarksInGroup(dbConnection *DBConnection, gr
 		err := rows.Scan(
 			&newBookmark.Id,
 			&newBookmark.BookmarkUrl,
-			&newBookmark.BookmarkTitle)
+			&newBookmark.BookmarkTitle,
+			&newBookmark.IconURL)
 
 		if err != nil {
 			log.Fatal(err)
