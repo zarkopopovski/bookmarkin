@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -241,10 +242,22 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 	icons, errIcon := finder.FetchIcons(bookmarkURL)
 
 	iconURL := ""
+	iconEncoded := ""
 
 	if errIcon == nil && len(icons) > 0 {
 		best := icons[0]
 		iconURL = best.URL
+
+		resp, err := http.Get(iconURL)
+		defer resp.Body.Close()
+
+		if err == nil {
+			contents, err := ioutil.ReadAll(resp.Body)
+
+			if err == nil {
+				iconEncoded = base64.StdEncoding.EncodeToString(contents)
+			}
+		}
 	}
 
 	if bookmarkTitle != "" {
@@ -254,7 +267,8 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 			BookmarkUrl:   bookmarkURL,
 			BookmarkTitle: bookmarkTitle,
 			BookmarkGroup: bookmarkGroup,
-			IconURL:       iconURL}
+			IconURL:       iconURL,
+			IconEncoded:   iconEncoded}
 
 		result = bookmark.CreateNewBookmark(bHandlers.dbConnection, userID)
 
