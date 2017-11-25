@@ -363,7 +363,7 @@ func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *htt
 	expEngine := exporter.getExporterByType(exportType)
 
 	exportData := expEngine.exportBookmarks(result)
-	fmt.Println(exportData)
+
 	if result != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
