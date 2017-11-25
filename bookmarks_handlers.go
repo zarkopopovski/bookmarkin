@@ -245,7 +245,7 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 	iconEncoded := ""
 
 	if errIcon == nil && len(icons) > 0 {
-		best := icons[0]
+		best := icons[(len(icons) - 1)]
 		iconURL = best.URL
 
 		resp, err := http.Get(iconURL)
