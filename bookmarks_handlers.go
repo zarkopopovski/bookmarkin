@@ -351,6 +351,36 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 	}
 }
 
+func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *http.Request) {
+	userID := r.FormValue("user_id")
+	exportType := r.FormValue("export_type")
+
+	bookmark := &Bookmark{}
+
+	result := bookmark.ListAllBookmarks(bHandlers.dbConnection, userID)
+
+	exporter := &Exporter{}
+	expEngine := exporter.getExporterByType(exportType)
+
+	exportData := expEngine.exportBookmarks(result)
+	fmt.Println(exportData)
+	if result != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+		panic(err)
+	}
+}
+
 func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {
 	groupID := r.FormValue("group_id")
 	userID := r.FormValue("user_id")

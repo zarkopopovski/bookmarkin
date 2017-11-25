@@ -25,6 +25,7 @@ func RoutesMap(api *ApiConnection) Routes {
 		Route{"ListBookmarksInGroup", "POST", "/list_group_bookmarks", api.bHandlers.ListBookmarksInGroup},
 		Route{"UpdateBookmark", "POST", "/update_bookmarks", api.bHandlers.UpdateBookmarks},
 		Route{"DeleteBookmark", "POST", "/delete_bookmarks", api.bHandlers.DeleteBookmark},
+		Route{"ExportBookmarks", "POST", "/export_bookmarks", api.bHandlers.ExportBookmarks},
 		Route{"ChangeBookmarkGroup", "POST", "/change_bookmark_group", api.bHandlers.ChangeBookmarkGroup},
 		Route{"CreateNewUser", "POST", "/create_user", api.uHandlers.CreateUserAccount},
 		Route{"ChangePassword", "POST", "/change_password", api.uHandlers.ChangeUserPassword},
