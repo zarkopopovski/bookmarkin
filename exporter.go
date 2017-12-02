@@ -36,7 +36,6 @@ func (exporter *HTMLExporter) exportBookmarks(bookmarks []*Bookmark) (export str
 	}
 
 	htmlString += "</ul></body></html>"
-
 	return htmlString
 }
 
@@ -46,6 +45,5 @@ func (exporter *JSONExporter) exportBookmarks(bookmarks []*Bookmark) (export str
 	if err != nil {
 		return ""
 	}
-
 	return string(jsonString)
 }

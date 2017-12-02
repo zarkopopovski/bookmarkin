@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -364,21 +366,17 @@ func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *htt
 
 	exportData := expEngine.exportBookmarks(result)
 
-	if result != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
+	fileDataInBytes := []byte(exportData)
 
-		if err := json.NewEncoder(w).Encode(result); err != nil {
-			panic(err)
-		}
-		return
-	}
+	bytesReader := bytes.NewReader(fileDataInBytes)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
-		panic(err)
-	}
+	io.Copy(w, bytesReader)
+
+	w.Header().Set("Content-Disposition", "attachment; filename='export."+exportType+"'")
+	w.Header().Set("Content-Type", "application/"+exportType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(fileDataInBytes)))
+
+	return
 }
 
 func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {

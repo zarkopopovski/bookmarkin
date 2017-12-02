@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func NewRouter(api *ApiConnection) *mux.Router {
@@ -33,6 +34,8 @@ func NewRouter(api *ApiConnection) *mux.Router {
 	fileHandler := http.FileServer(fs)
 
 	router.PathPrefix("/files").Handler(http.StripPrefix("/files", fileHandler))
+
+	//router.HandleFunc("/export_bookmarks", api.bHandlers.ExportBookmarks)
 
 	return router
 }
