@@ -41,7 +41,10 @@ func (dbConnection *DBConnection) setupInitialDatabase() (err error) {
 	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS groups (id VARCHAR PRIMARY KEY, user_id VARCHAR, group_name VARCHAR)")
 	statement.Exec()
 
-	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS bookmarks (id VARCHAR PRIMARY KEY, user_id VARCHAR, bookmark_url VARCHAR, bookmark_title VARCHAR, bookmark_icon VARCHAR, bookmark_icon_base64 VARCHAR, bookmark_group VARCHAR)")
+	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS bookmarks (id VARCHAR PRIMARY KEY, user_id VARCHAR, base_url VARCHAR, bookmark_url VARCHAR, bookmark_title VARCHAR, bookmark_icon VARCHAR, bookmark_icon_base64 VARCHAR, bookmark_group VARCHAR)")
+	statement.Exec()
+
+	statement, _ = dbConnection.db.Prepare("CREATE TABLE IF NOT EXISTS bookmark_icons (id VARCHAR PRIMARY KEY, bookmark_id VARCHAR, user_id VARCHAR, base_url VARCHAR, bookmark_icon VARCHAR, bookmark_icon_base64 VARCHAR)")
 	statement.Exec()
 
 	return

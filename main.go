@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+//TODO: Implement configuration by using config file
 func main() {
 
 	apiConnection := CreateApiConnection()

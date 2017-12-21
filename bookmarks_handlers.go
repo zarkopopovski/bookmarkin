@@ -218,6 +218,7 @@ func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.
 	}
 }
 
+//TODO: Check if the icon exist in database by selecting the base URL, and if exist return icon ID, otherwise download and save
 func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkGroup := r.FormValue("bookmark_group")
@@ -329,6 +330,7 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 	}
 }
 
+//TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
 func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("user_id")
 
@@ -353,6 +355,7 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 	}
 }
 
+//TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
 func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("user_id")
 	exportType := r.FormValue("export_type")
@@ -379,6 +382,7 @@ func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *htt
 	return
 }
 
+//TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
 func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {
 	groupID := r.FormValue("group_id")
 	userID := r.FormValue("user_id")
@@ -437,6 +441,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *htt
 	}
 }
 
+//TODO: Check if there are other bookmarks that are using the same icon by counting base_url, if not, delete also the icon from the bookmark_icon table
 func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
 	bookmarkID := r.FormValue("bookmark_id")
 	userID := r.FormValue("user_id")
