@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	"io/ioutil"
-
-	"git.cerebralab.com/george/logo"
 )
 
 type ApiConnection struct {
@@ -15,7 +13,7 @@ type ApiConnection struct {
 	uHandlers    *UsersHandlers
 }
 
-func CreateApiConnection() *ApiConnection {
+func CreateApiConnection(config *Config) *ApiConnection {
 	API := &ApiConnection{
 		dbConnection: OpenConnectionSession(),
 		bHandlers:    &BookmarkHandlers{},
@@ -30,10 +28,10 @@ func CreateApiConnection() *ApiConnection {
 func (c *ApiConnection) Index(w http.ResponseWriter, r *http.Request) {
 	index, err := ioutil.ReadFile("./web/index.html")
 
-	logo.RuntimeError(err)
+	panic(err)
 
 	if err != nil {
-		logo.RuntimeError(err)
+		panic(err)
 		return
 	}
 
