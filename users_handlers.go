@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	
+	"github.com/julienschmidt/httprouter"
 	//"strconv"
 )
 
@@ -12,7 +14,7 @@ type UsersHandlers struct {
 	dbConnection *DBConnection
 }
 
-func (uHandlers *UsersHandlers) CreateUserAccount(w http.ResponseWriter, r *http.Request) {
+func (uHandlers *UsersHandlers) CreateUserAccount(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	email := r.FormValue("email")
@@ -48,7 +50,7 @@ func (uHandlers *UsersHandlers) CreateUserAccount(w http.ResponseWriter, r *http
 
 }
 
-func (uHandlers *UsersHandlers) LoginWithCredentials(w http.ResponseWriter, r *http.Request) {
+func (uHandlers *UsersHandlers) LoginWithCredentials(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
@@ -81,7 +83,7 @@ func (uHandlers *UsersHandlers) LoginWithCredentials(w http.ResponseWriter, r *h
 	}
 }
 
-func (uHandlers *UsersHandlers) ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
+func (uHandlers *UsersHandlers) ChangeUserPassword(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 	password := r.FormValue("password")
 	newPassword := r.FormValue("new_password")

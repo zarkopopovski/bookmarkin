@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/knq/ini"
+	"github.com/kenshaw/ini"
+	"github.com/rs/cors"
 )
 
 type Config struct {
@@ -41,5 +42,7 @@ func main() {
 
 	router := NewRouter(apiConnection)
 
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	handler := cors.Default().Handler(router)
+
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

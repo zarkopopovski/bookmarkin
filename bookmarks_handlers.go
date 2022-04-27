@@ -9,19 +9,65 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	
+	"strings"
+	
+	"errors"
 
-	"github.com/mat/besticon/besticon"
+	"github.com/PuerkitoBio/goquery"
+	
+	"github.com/julienschmidt/httprouter"
 )
 
 type BookmarkHandlers struct {
 	dbConnection *DBConnection
 }
 
-func (bHandlers *BookmarkHandlers) ShowFavIcon(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ShowFavIcon(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	http.ServeFile(w, r, "./web/bookmarkin-flat.png")
 }
 
-func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) FindFavIcon(urlString string, res *http.Response) (favIconURL string, webTitle string, err error) {
+	icons := []string{}
+  
+  if res.StatusCode > 400 {
+    fmt.Println("Status code: ", res.StatusCode)
+  }
+  
+  doc, err := goquery.NewDocumentFromReader(res.Body)
+  if err != nil {
+		panic(err)
+  }
+  
+  webTitle = strings.TrimSpace(doc.Find("title").Text())
+  initialIconURL := ""
+  
+  doc.Find("link").Each(func(i int, s *goquery.Selection) {
+    rel, _ := s.Attr("rel")
+    fmt.Println(rel)
+    if rel == "icon" {
+      href, _ := s.Attr("href")
+      
+      if strings.HasPrefix(href, "http") {
+        icons = append(icons, fmt.Sprintf("%s", href))
+      } else {
+        icons = append(icons, fmt.Sprintf("%s/%s", urlString, href))
+      }
+    }
+  })
+  
+  if len(icons) > 0 {
+		initialIconURL = strings.TrimSpace(icons[0])
+  }
+  
+  if webTitle != "" || initialIconURL != "" {
+		return initialIconURL, webTitle, nil
+  } 
+  
+  return "", "", errors.New("error found")
+}
+
+func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	groupName := r.FormValue("group_name")
 	userID := r.FormValue("user_id")
 
@@ -47,7 +93,7 @@ func (bHandlers *BookmarkHandlers) CreateBookmarkGroup(w http.ResponseWriter, r 
 	}
 }
 
-func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	groupName := r.FormValue("group_name")
 	groupID := r.FormValue("group_id")
 	userID := r.FormValue("user_id")
@@ -74,7 +120,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarkGroup(w http.ResponseWriter, r 
 	}
 }
 
-func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	groupID := r.FormValue("group_id")
 	forceDelete := r.FormValue("force")
 	userID := r.FormValue("user_id")
@@ -157,7 +203,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmarkGroup(w http.ResponseWriter, r 
 	}
 }
 
-func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 
 	bookmark := &Bookmark{}
@@ -182,7 +228,7 @@ func (bHandlers *BookmarkHandlers) ListBookmarkGroups(w http.ResponseWriter, r *
 
 }
 
-func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkTitle := ""
 
@@ -219,15 +265,12 @@ func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.
 }
 
 //TODO: Check if the icon exist in database by selecting the base URL, and if exist return icon ID, otherwise download and save
-func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkGroup := r.FormValue("bookmark_group")
 	userID := r.FormValue("user_id")
 	bookmarkTitle := ""
 	result := false
-
-	besticon.SetLogOutput(ioutil.Discard)
-	finder := besticon.IconFinder{}
 
 	resp, err := http.Get(bookmarkURL)
 
@@ -235,22 +278,12 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 		panic(err)
 	}
 	defer resp.Body.Close()
+	
+	iconURL, bookmarkTitle, errIcon := bHandlers.FindFavIcon(bookmarkURL, resp)
+	iconEncoded := ""	
 
-	if title, ok := GetHtmlTitle(resp.Body); ok {
-		bookmarkTitle = title
-	} else {
-		println("Fail to get HTML title")
-	}
-
-	icons, errIcon := finder.FetchIcons(bookmarkURL)
-
-	iconURL := ""
-	iconEncoded := ""
-
-	if errIcon == nil && len(icons) > 0 {
-		best := icons[(len(icons) - 1)]
-		iconURL = best.URL
-
+	if errIcon == nil && iconURL != "" {
+		fmt.Println(iconURL)
 		resp, err := http.Get(iconURL)
 		defer resp.Body.Close()
 
@@ -294,7 +327,7 @@ func (bHandlers *BookmarkHandlers) CreateBookmark(w http.ResponseWriter, r *http
 	}
 }
 
-func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkURL := r.FormValue("bookmark_url")
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkGroup := r.FormValue("bookmark_group")
@@ -331,7 +364,7 @@ func (bHandlers *BookmarkHandlers) SaveBookmark(w http.ResponseWriter, r *http.R
 }
 
 //TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
-func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 
 	bookmark := &Bookmark{}
@@ -356,7 +389,7 @@ func (bHandlers *BookmarkHandlers) ListBookmarks(w http.ResponseWriter, r *http.
 }
 
 //TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
-func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 	exportType := r.FormValue("export_type")
 
@@ -383,7 +416,7 @@ func (bHandlers *BookmarkHandlers) ExportBookmarks(w http.ResponseWriter, r *htt
 }
 
 //TODO: Join with bookmark_icons table comparing with base_url because the bookmark icon may exist only once in database
-func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	groupID := r.FormValue("group_id")
 	userID := r.FormValue("user_id")
 
@@ -408,7 +441,7 @@ func (bHandlers *BookmarkHandlers) ListBookmarksInGroup(w http.ResponseWriter, r
 	}
 }
 
-func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkTitle := r.FormValue("bookmark_title")
 	bookmarkID := r.FormValue("bookmark_id")
 	userID := r.FormValue("user_id")
@@ -442,7 +475,7 @@ func (bHandlers *BookmarkHandlers) UpdateBookmarks(w http.ResponseWriter, r *htt
 }
 
 //TODO: Check if there are other bookmarks that are using the same icon by counting base_url, if not, delete also the icon from the bookmark_icon table
-func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkID := r.FormValue("bookmark_id")
 	userID := r.FormValue("user_id")
 	result := false
@@ -471,7 +504,7 @@ func (bHandlers *BookmarkHandlers) DeleteBookmark(w http.ResponseWriter, r *http
 	}
 }
 
-func (bHandlers *BookmarkHandlers) ChangeBookmarkGroup(w http.ResponseWriter, r *http.Request) {
+func (bHandlers *BookmarkHandlers) ChangeBookmarkGroup(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	bookmarkID := r.FormValue("bookmark_id")
 	newGroupID := r.FormValue("group_id")
 	result := false

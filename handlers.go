@@ -5,12 +5,19 @@ import (
 	"net/http"
 
 	"io/ioutil"
+	
+	"github.com/julienschmidt/httprouter"
 )
 
 type ApiConnection struct {
 	dbConnection *DBConnection
 	bHandlers    *BookmarkHandlers
 	uHandlers    *UsersHandlers
+}
+
+type jsonErr struct {
+	Code int    `json:"code"`
+	Text string `json:"text"`
 }
 
 func CreateApiConnection(config *Config) *ApiConnection {
@@ -25,15 +32,19 @@ func CreateApiConnection(config *Config) *ApiConnection {
 	return API
 }
 
-func (c *ApiConnection) Index(w http.ResponseWriter, r *http.Request) {
+func (c *ApiConnection) Index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	index, err := ioutil.ReadFile("./web/index.html")
 
-	panic(err)
+	//panic(err)
 
 	if err != nil {
-		panic(err)
-		return
+			panic(err)
+			return
 	}
+
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprintf(w, string(index))
 }
