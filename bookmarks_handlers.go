@@ -239,12 +239,6 @@ func (bHandlers *BookmarkHandlers) ReadPageTitle(w http.ResponseWriter, r *http.
 	}
 	defer resp.Body.Close()
 
-	if title, ok := GetHtmlTitle(resp.Body); ok {
-		bookmarkTitle = title
-	} else {
-		println("Fail to get HTML title")
-	}
-
 	if bookmarkTitle != "" {
 		fmt.Println(bookmarkTitle)
 
